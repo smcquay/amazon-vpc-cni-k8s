@@ -1,6 +1,6 @@
 [[constraint]]
-  name = "github.com/aws/amazon-ecs-cni-plugins"
   branch = "master"
+  name = "github.com/aws/amazon-ecs-cni-plugins"
 
 [[constraint]]
   name = "github.com/aws/aws-sdk-go"
