@@ -15,9 +15,10 @@ package main
 
 import (
 	"fmt"
+	"net"
+
 	"github.com/aws/amazon-vpc-cni-k8s/pkg/networkutils"
 	"github.com/aws/amazon-vpc-cni-k8s/plugins/routed-eni/driver"
-	"net"
 )
 
 const (
@@ -50,13 +51,14 @@ func main() {
 	drv := driver.New()
 
 	hdlr.SetupENINetwork(eniIP, eniMAC, eniDeviceNum, eniSubnet)
-
 	hdlr.SetupENINetwork(eniIP, eniMAC, eniDeviceNum, updatedENISubnet)
 
 	ip := net.ParseIP(nodeIP)
 
 	_, cidr, _ := net.ParseCIDR(vpcCIDR)
-	err := hdlr.SetupHostNetwork(cidr, &ip)
+	if err := hdlr.SetupHostNetwork(cidr, &ip); err != nil {
+		panic(err)
+	}
 
 	fmt.Printf("SetupNodeNetwork %v", err)
 
