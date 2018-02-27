@@ -105,15 +105,13 @@ func (c *IPAMContext) nodeInit() error {
 	for _, eni := range enis {
 		log.Debugf("Discovered ENI %s", eni.ENIID)
 
-		err = c.awsClient.AllocAllIPAddress(eni.ENIID)
-		if err != nil {
+		if err := c.awsClient.AllocAllIPAddress(eni.ENIID); err != nil {
 			//TODO(aws): need to increment ipamd err stats
-			log.Warn("During ipamd init:  error encountered on trying to allocate all available IP addresses", err)
+			log.Warn("ipamd init: error encountered on trying to allocate all available IP addresses", err)
 			// fall though to add those allocated OK addresses
 		}
 
-		err = c.setupENI(eni.ENIID, eni)
-		if err != nil {
+		if err := c.setupENI(eni.ENIID, eni); err != nil {
 			log.Errorf("Failed to setup eni %s network: %v", eni.ENIID, err)
 			return errors.Wrapf(err, "Failed to setup eni %v", eni.ENIID)
 		}
@@ -121,16 +119,15 @@ func (c *IPAMContext) nodeInit() error {
 
 	usedIPs, err := c.k8sClient.K8SGetLocalPodIPs(c.awsClient.GetLocalIPv4())
 	if err != nil {
-		log.Warnf("During ipamd init, failed to get Pod information from Kubelet %v", err)
+		log.Warnf("ipamd init: failed to get Pod information from Kubelet %v", err)
 		// This can happens when L-IPAMD starts before kubelet.
 		// TODO(aws):  need to add node health stats here
 		return nil
 	}
 
 	for _, ip := range usedIPs {
-		_, _, err = c.dataStore.AssignPodIPv4Address(ip)
-		if err != nil {
-			log.Warnf("During ipamd init, failed to use pod ip %s returned from Kubelet %v", ip.IP, err)
+		if _, _, err := c.dataStore.AssignPodIPv4Address(ip); err != nil {
+			log.Warnf("ipamd init: failed to use pod ip %s returned from Kubelet %v", ip.IP, err)
 			// TODO(aws): continue, but need to add node health stats here
 			// TODO(aws): need to feed this to controller on the health of pod and node
 			// This is a bug among kubelet/cni-plugin/l-ipamd/ec2-metadata that this particular pod is using an non existent ip address.
@@ -277,14 +274,7 @@ func (c *IPAMContext) getENIaddresses(eni string) ([]*ec2.NetworkInterfacePrivat
 
 func (c *IPAMContext) waitENIAttached(eni string) (awsutils.ENIMetadata, error) {
 	// wait till eni is showup in the instance meta data service
-	retry := 0
-	for {
-		retry++
-		if retry > maxRetryCheckENI {
-			log.Errorf("Unable to discover attached ENI from metadata service")
-			// TODO(aws): need to add health stats
-			return awsutils.ENIMetadata{}, errors.New("add eni: not able to retrieve eni from metata service")
-		}
+	for retry := 0; retry < maxRetryCheckENI; retry++ {
 		enis, err := c.awsClient.GetAttachedENIs()
 		if err != nil {
 			log.Warnf("Failed to increase pool, error trying to discover attached enis: %v ", err)
@@ -300,9 +290,12 @@ func (c *IPAMContext) waitENIAttached(eni string) (awsutils.ENIMetadata, error) 
 		}
 
 		log.Debugf("Not able to discover attached eni yet (attempt %d/%d)", retry, maxRetryCheckENI)
-
 		time.Sleep(eniAttachTime)
 	}
+
+	log.Errorf("Unable to discover attached ENI from metadata service")
+	// TODO(aws): need to add health stats
+	return awsutils.ENIMetadata{}, errors.New("add eni: not able to retrieve eni from metata service")
 }
 
 //nodeIPPoolTooLow returns true if IP pool is below low threshhold
