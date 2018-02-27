@@ -23,8 +23,8 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	"github.com/aws/amazon-vpc-cni-k8s/ipamd/datastore"
+	pb "github.com/aws/amazon-vpc-cni-k8s/ipamd/rpc"
 	"github.com/aws/amazon-vpc-cni-k8s/pkg/k8sapi"
-	pb "github.com/aws/amazon-vpc-cni-k8s/rpc"
 )
 
 const (

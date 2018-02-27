@@ -33,11 +33,11 @@ import (
 	"github.com/containernetworking/cni/pkg/types/current"
 	cniSpecVersion "github.com/containernetworking/cni/pkg/version"
 
+	pb "github.com/aws/amazon-vpc-cni-k8s/ipamd/rpc"
 	"github.com/aws/amazon-vpc-cni-k8s/pkg/grpcwrapper"
 	"github.com/aws/amazon-vpc-cni-k8s/pkg/rpcwrapper"
 	"github.com/aws/amazon-vpc-cni-k8s/pkg/typeswrapper"
 	"github.com/aws/amazon-vpc-cni-k8s/plugins/routed-eni/driver"
-	pb "github.com/aws/amazon-vpc-cni-k8s/rpc"
 )
 
 const (

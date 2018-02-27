@@ -14,7 +14,7 @@
 package rpcwrapper
 
 import (
-	"github.com/aws/amazon-vpc-cni-k8s/rpc"
+	"github.com/aws/amazon-vpc-cni-k8s/ipamd/rpc"
 	grpc "google.golang.org/grpc"
 )
 

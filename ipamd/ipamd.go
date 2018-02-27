@@ -193,8 +193,7 @@ func (c *IPAMD) increaseIPPool() {
 		return
 	}
 
-	err = c.awsClient.AllocAllIPAddress(eni)
-	if err != nil {
+	if err = c.awsClient.AllocAllIPAddress(eni); err != nil {
 		log.Warnf("Failed to allocate all available ip addresses on an ENI %v", err)
 		// continue to proecsses those allocated ip addresses
 	}
