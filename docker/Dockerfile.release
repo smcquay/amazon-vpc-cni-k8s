@@ -7,11 +7,11 @@ RUN apt-get update && \
 WORKDIR /app
 
 COPY aws-cni /app 
-COPY misc/aws.conf /app
+COPY docker/aws.conf /app
 
 # Copy our bundled certs to the first place go will check: see 
 # https://golang.org/src/pkg/crypto/x509/root_unix.go
-COPY misc/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY docker/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
 ADD aws-k8s-agent  /app
 ADD scripts/aws-cni-support.sh /app
