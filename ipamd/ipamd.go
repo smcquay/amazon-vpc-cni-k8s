@@ -310,8 +310,8 @@ func (c *IPAMContext) waitENIAttached(eni string) (awsutils.ENIMetadata, error) 
 //nodeIPPoolTooLow returns true if IP pool is below low threshhold
 func (c *IPAMContext) nodeIPPoolTooLow() bool {
 	total, used := c.dataStore.GetStats()
-	log.Debugf("IP pool stats: total=%d, used=%d, c.currentMaxAddrsPerENI =%d, c.maxAddrsPerENI = %d",
-		total, used, c.currentMaxAddrsPerENI, c.maxAddrsPerENI)
+	// log.Debugf("IP pool stats: total=%d, used=%d, c.currentMaxAddrsPerENI =%d, c.maxAddrsPerENI = %d",
+	// 	total, used, c.currentMaxAddrsPerENI, c.maxAddrsPerENI)
 
 	return ((total - used) <= c.currentMaxAddrsPerENI)
 }
@@ -320,8 +320,8 @@ func (c *IPAMContext) nodeIPPoolTooLow() bool {
 func (c *IPAMContext) nodeIPPoolTooHigh() bool {
 	total, used := c.dataStore.GetStats()
 
-	log.Debugf("IP pool stats: total=%d, used=%d, c.currentMaxAddrsPerENI =%d, c.maxAddrsPerENI = %d",
-		total, used, c.currentMaxAddrsPerENI, c.maxAddrsPerENI)
+	// log.Debugf("IP pool stats: total=%d, used=%d, c.currentMaxAddrsPerENI =%d, c.maxAddrsPerENI = %d",
+	// 	total, used, c.currentMaxAddrsPerENI, c.maxAddrsPerENI)
 
 	return (total-used > 2*c.currentMaxAddrsPerENI)
 
