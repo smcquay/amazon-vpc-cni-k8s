@@ -15,6 +15,7 @@ package k8sapi
 
 import (
 	"encoding/json"
+
 	"k8s.io/kubernetes/pkg/api"
 
 	"github.com/aws/amazon-vpc-cni-k8s/pkg/httpwrapper"
