@@ -36,9 +36,6 @@ import (
 
 	"github.com/aws/amazon-vpc-cni-k8s/cmd/cni/driver"
 	pb "github.com/aws/amazon-vpc-cni-k8s/ipamd/rpc"
-	"github.com/aws/amazon-vpc-cni-k8s/pkg/grpcwrapper"
-	"github.com/aws/amazon-vpc-cni-k8s/pkg/rpcwrapper"
-	"github.com/aws/amazon-vpc-cni-k8s/pkg/typeswrapper"
 )
 
 const (
@@ -105,10 +102,11 @@ func cmdAdd(args *skel.CmdArgs) error {
 	defer conn.Close()
 
 	c := pb.NewCNIBackendClient(conn)
-	return add(args, c, typeswrapper.New(), grpcwrapper.New(), rpcwrapper.New(), driver.New())
+	return add(args, c, driver.New())
 }
 
-func add(args *skel.CmdArgs, c pb.CNIBackendClient, cniTypes typeswrapper.CNITYPES, grpcClient grpcwrapper.GRPC, rpcClient rpcwrapper.RPC, driverClient driver.NetworkAPIs) error {
+// func add(args *skel.CmdArgs, c pb.CNIBackendClient, types typeswrapper.types, grpcClient grpcwrapper.GRPC, rpcClient rpcwrapper.RPC, driverClient driver.NetworkAPIs) error {
+func add(args *skel.CmdArgs, c pb.CNIBackendClient, driverClient driver.NetworkAPIs) error {
 	log.Infof("Received CNI add request: %s argsStdinData(%s)", logArgs(args), args.StdinData)
 
 	conf := NetConf{}
@@ -118,7 +116,7 @@ func add(args *skel.CmdArgs, c pb.CNIBackendClient, cniTypes typeswrapper.CNITYP
 	}
 
 	k8sArgs := K8sArgs{}
-	if err := cniTypes.LoadArgs(args.Args, &k8sArgs); err != nil {
+	if err := types.LoadArgs(args.Args, &k8sArgs); err != nil {
 		log.Errorf("Failed to load k8s config from arg: %v", err)
 		return errors.Wrap(err, "add cmd: failed to load k8s config from arg")
 	}
@@ -173,7 +171,7 @@ func add(args *skel.CmdArgs, c pb.CNIBackendClient, cniTypes typeswrapper.CNITYP
 		},
 	}
 
-	return cniTypes.PrintResult(result, conf.CNIVersion)
+	return types.PrintResult(result, conf.CNIVersion)
 }
 
 // generateHostVethName returns a name to be used on the host-side veth device.
@@ -194,10 +192,10 @@ func cmdDel(args *skel.CmdArgs) error {
 	defer conn.Close()
 
 	c := pb.NewCNIBackendClient(conn)
-	return del(args, c, typeswrapper.New(), grpcwrapper.New(), rpcwrapper.New(), driver.New())
+	return del(args, c, driver.New())
 }
 
-func del(args *skel.CmdArgs, c pb.CNIBackendClient, cniTypes typeswrapper.CNITYPES, grpcClient grpcwrapper.GRPC, rpcClient rpcwrapper.RPC, driverClient driver.NetworkAPIs) error {
+func del(args *skel.CmdArgs, c pb.CNIBackendClient, driverClient driver.NetworkAPIs) error {
 	log.Infof("Received CNI del request: %s argsStdinData(%s)", logArgs(args), args.StdinData)
 
 	conf := NetConf{}
@@ -207,7 +205,7 @@ func del(args *skel.CmdArgs, c pb.CNIBackendClient, cniTypes typeswrapper.CNITYP
 	}
 
 	k8sArgs := K8sArgs{}
-	if err := cniTypes.LoadArgs(args.Args, &k8sArgs); err != nil {
+	if err := types.LoadArgs(args.Args, &k8sArgs); err != nil {
 		log.Errorf("Failed to load k8s config from args: %v", err)
 		return errors.Wrap(err, "del cmd: failed to load k8s config from args")
 	}
