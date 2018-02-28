@@ -184,12 +184,21 @@ func generateHostVethName(prefix, namespace, podname string) string {
 }
 
 func cmdDel(args *skel.CmdArgs) error {
-	return del(args, typeswrapper.New(), grpcwrapper.New(), rpcwrapper.New(), driver.New())
+	// notify local IP address manager to free secondary IP
+	// Set up a connection to the server.
+	conn, err := grpc.Dial(ipamDAddress, grpc.WithInsecure())
+	if err != nil {
+		log.Errorf("Failed to connect to backend server %s: %v", logArgs(args), err)
+		return errors.Wrap(err, "del cmd: failed to connect to backend server")
+	}
+	defer conn.Close()
+
+	c := pb.NewCNIBackendClient(conn)
+	return del(args, c, typeswrapper.New(), grpcwrapper.New(), rpcwrapper.New(), driver.New())
 }
 
-func del(args *skel.CmdArgs, cniTypes typeswrapper.CNITYPES, grpcClient grpcwrapper.GRPC, rpcClient rpcwrapper.RPC, driverClient driver.NetworkAPIs) error {
-	log.Infof("Received CNI del request: ContainerID(%s) Netns(%s) IfName(%s) Args(%s) Path(%s) argsStdinData(%s)",
-		args.ContainerID, args.Netns, args.IfName, args.Args, args.Path, args.StdinData)
+func del(args *skel.CmdArgs, c pb.CNIBackendClient, cniTypes typeswrapper.CNITYPES, grpcClient grpcwrapper.GRPC, rpcClient rpcwrapper.RPC, driverClient driver.NetworkAPIs) error {
+	log.Infof("Received CNI del request: %s argsStdinData(%s)", logArgs(args), args.StdinData)
 
 	conf := NetConf{}
 	if err := json.Unmarshal(args.StdinData, &conf); err != nil {
@@ -202,18 +211,6 @@ func del(args *skel.CmdArgs, cniTypes typeswrapper.CNITYPES, grpcClient grpcwrap
 		log.Errorf("Failed to load k8s config from args: %v", err)
 		return errors.Wrap(err, "del cmd: failed to load k8s config from args")
 	}
-
-	// notify local IP address manager to free secondary IP
-	// Set up a connection to the server.
-	conn, err := grpcClient.Dial(ipamDAddress, grpc.WithInsecure())
-	if err != nil {
-		log.Errorf("Failed to connect to backend server for %s: %v", k8sArgs.String(), err)
-
-		return errors.Wrap(err, "del cmd: failed to connect to backend server")
-	}
-	defer conn.Close()
-
-	c := rpcClient.NewCNIBackendClient(conn)
 
 	r, err := c.DelNetwork(context.Background(), &pb.DelNetworkRequest{
 		K8S_POD_NAME:               string(k8sArgs.K8S_POD_NAME),

@@ -22,7 +22,8 @@ import (
 	"github.com/containernetworking/cni/pkg/ns"
 	"github.com/vishvananda/netlink"
 
-	log "github.com/cihub/seelog"
+	// log "github.com/cihub/seelog"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/aws/amazon-vpc-cni-k8s/pkg/ipwrapper"
 	"github.com/aws/amazon-vpc-cni-k8s/pkg/netlinkwrapper"
