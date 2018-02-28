@@ -115,10 +115,10 @@ func (*netLink) NewRule() *netlink.Rule {
 	return netlink.NewRule()
 }
 
-func (*netLink) RuleDel(rule *netlink.Rule) error {
-	return netlink.RuleDel(rule)
-}
+// func (*netLink) RuleDel(rule *netlink.Rule) error {
+// 	return netlink.RuleDel(rule)
+// }
 
-func (*netLink) RuleAdd(rule *netlink.Rule) error {
-	return netlink.RuleAdd(rule)
-}
+// func (*netLink) RuleAdd(rule *netlink.Rule) error {
+// 	return netlink.RuleAdd(rule)
+// }

@@ -99,7 +99,6 @@ func (createVethContext *createVethPairContext) run(hostNS ns.NetNS) error {
 	}
 
 	hostVeth, err := createVethContext.netLink.LinkByName(createVethContext.hostVethName)
-
 	if err != nil {
 		return err
 	}
@@ -125,13 +124,13 @@ func (createVethContext *createVethPairContext) run(hostNS ns.NetNS) error {
 	// # ip route show
 	//default via 169.254.1.1 dev eth0
 	//169.254.1.1 dev eth0
-	gw := net.IPv4(169, 254, 1, 1)
-	gwNet := &net.IPNet{IP: gw, Mask: net.CIDRMask(32, 32)}
+	gwNet := &net.IPNet{IP: net.IPv4(169, 254, 1, 1), Mask: net.CIDRMask(32, 32)}
 
 	if err = createVethContext.netLink.RouteAdd(&netlink.Route{
 		LinkIndex: contVeth.Attrs().Index,
 		Scope:     netlink.SCOPE_LINK,
-		Dst:       gwNet}); err != nil {
+		Dst:       gwNet,
+	}); err != nil {
 		return errors.Wrap(err, "setup NS network: failed to add default gateway")
 	}
 
@@ -186,14 +185,12 @@ func setupNS(hostVethName string, contVethName string, netnsPath string, addr *n
 	}
 
 	createVethContext := newCreateVethPairContext(contVethName, hostVethName, addr)
-
 	if err := ns.WithNetNSPath(netnsPath, createVethContext.run); err != nil {
 		log.Errorf("Failed to setup NS network %v", err)
 		return errors.Wrap(err, "setup NS network: failed to setup NS network")
 	}
 
 	hostVeth, err := netLink.LinkByName(hostVethName)
-
 	if err != nil {
 		return errors.Wrapf(err, "setup NS network: failed to find link %q", hostVethName)
 	}
@@ -207,19 +204,20 @@ func setupNS(hostVethName string, contVethName string, netnsPath string, addr *n
 	log.Debugf("Setup host route outgoing hostVeth, LinkIndex %d\n", hostVeth.Attrs().Index)
 	addrHostAddr := &net.IPNet{
 		IP:   addr.IP,
-		Mask: net.CIDRMask(32, 32)}
+		Mask: net.CIDRMask(32, 32),
+	}
 
 	// Add host route
 	if err = netLink.RouteAdd(&netlink.Route{
 		LinkIndex: hostVeth.Attrs().Index,
 		Scope:     netlink.SCOPE_LINK,
-		Dst:       addrHostAddr}); err != nil {
+		Dst:       addrHostAddr,
+	}); err != nil {
 		return errors.Wrap(err, "setup NS network: failed to add host route")
 	}
-	toContainerFlag := true
-	err = addContainerRule(netLink, toContainerFlag, addr, toContainerRulePriority, mainRouteTable)
 
-	if err != nil {
+	toContainerFlag := true
+	if err = addContainerRule(netLink, toContainerFlag, addr, toContainerRulePriority, mainRouteTable); err != nil {
 		log.Errorf("Failed to add toContainer rule for %s err=%v, ", addr.String(), err)
 		return errors.Wrap(err, "setup NS network: failed to add toContainer")
 	}
@@ -251,14 +249,11 @@ func addContainerRule(netLink netlinkwrapper.NetLink, isToContainer bool, addr *
 	containerRule.Table = table
 	containerRule.Priority = priority
 
-	err := netLink.RuleDel(containerRule)
-	if err != nil && !containsNoSuchRule(err) {
+	if err := netLink.RuleDel(containerRule); err != nil && !containsNoSuchRule(err) {
 		return errors.Wrapf(err, "add NS network: failed to delete old container rule for %s", addr.String())
 	}
 
-	err = netLink.RuleAdd(containerRule)
-
-	if err != nil {
+	if err := netLink.RuleAdd(containerRule); err != nil {
 		return errors.Wrapf(err, "add NS network: failed to add container rule  for %s", addr.String())
 	}
 
@@ -277,9 +272,8 @@ func tearDownNS(addr *net.IPNet, table int, netLink netlinkwrapper.NetLink) erro
 	toContainerRule := netLink.NewRule()
 	toContainerRule.Dst = addr
 	toContainerRule.Priority = toContainerRulePriority
-	err := netLink.RuleDel(toContainerRule)
 
-	if err != nil {
+	if err := netLink.RuleDel(toContainerRule); err != nil {
 		log.Errorf("Failed to delete toContainer rule for %s err %v", addr.String(), err)
 	} else {
 		log.Infof("Delete toContainer rule for %s ", addr.String())
@@ -290,8 +284,7 @@ func tearDownNS(addr *net.IPNet, table int, netLink netlinkwrapper.NetLink) erro
 		fromContainerRule := netlink.NewRule()
 		fromContainerRule.Src = addr
 		fromContainerRule.Table = table
-		err = netLink.RuleDel(fromContainerRule)
-		if err != nil {
+		if err := netLink.RuleDel(fromContainerRule); err != nil {
 			log.Errorf("Failed to delete fromContainer for %s %v", addr.String(), err)
 			return errors.Wrapf(err, "delete NS network: failed to delete fromContainer rule for %s", addr.String())
 		}
