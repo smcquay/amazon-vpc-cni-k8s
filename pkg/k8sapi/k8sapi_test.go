@@ -16,11 +16,12 @@ package k8sapi
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"testing"
 
-	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 	"k8s.io/kubernetes/pkg/api"
 )
 
@@ -30,14 +31,14 @@ const (
 	testIP = "10.10.0.1"
 )
 
-func setup(t *testing.T) (*gomock.Controller,
-	*mock_ioutilwrapper.MockIOUtil,
-	*mock_httpwrapper.MockHTTP) {
-	ctrl := gomock.NewController(t)
-	return ctrl,
-		mock_ioutilwrapper.NewMockIOUtil(ctrl),
-		mock_httpwrapper.NewMockHTTP(ctrl)
-}
+// func setup(t *testing.T) (*gomock.Controller,
+// 	*mock_ioutilwrapper.MockIOUtil,
+// 	*mock_httpwrapper.MockHTTP) {
+// 	ctrl := gomock.NewController(t)
+// 	return ctrl,
+// 		mock_ioutilwrapper.NewMockIOUtil(ctrl),
+// 		mock_httpwrapper.NewMockHTTP(ctrl)
+// }
 
 type mockHTTPResp struct{}
 
@@ -87,4 +88,30 @@ func TestK8SGetLocalPodIPs(t *testing.T) {
 	// TODO (tvi): reenable
 	// assert.NoError(t, err)
 	// assert.Equal(t, len(podsInfo), 2)
+}
+
+func TestK8SGetLocalPodIPsErrGETLocal(t *testing.T) {
+	_, err := k8sGetLocalPodIPs(getter{func(url string) (resp *http.Response, err error) {
+		if url == kubeletURL {
+			return nil, errors.New("Err on HTTP.get localHost")
+		} else if url == kubeletURLPrefix+testIP+kubeletURLSurfix {
+			return nil, errors.New("Err on HTTP.get by IP")
+		}
+		return nil, nil
+	}}, testIP)
+
+	assert.Error(t, err)
+}
+
+func TestK8SGetLocalPodIPsErrRead(t *testing.T) {
+	_, err := k8sGetLocalPodIPs(getter{func(url string) (resp *http.Response, err error) {
+		if url == kubeletURL {
+			return &http.Response{
+				Body: nopCloser{bytes.NewBufferString("randomNoise")},
+			}, nil
+		}
+		return nil, nil
+	}}, testIP)
+
+	assert.Error(t, err)
 }
