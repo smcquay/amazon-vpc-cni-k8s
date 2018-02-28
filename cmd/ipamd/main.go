@@ -31,7 +31,7 @@ var (
 )
 
 func main() {
-	defer log.Flush()
+	// defer log.Flush()
 	// logger.SetupLogger(logger.GetLogFileLocation(defaultLogFilePath))
 	log.Infof("Starting L-IPAMD %v %v  ...", Version, fmt.Sprintf("(%v)", GitVersion))
 

@@ -11,6 +11,6 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-package ipwrapper
+package ec2metadata
 
-//go:generate go run ../../scripts/mockgen.go github.com/aws/amazon-vpc-cni-k8s/pkg/ipwrapper IP mocks/ipwrapper_mocks.go
+//go:generate go run ../../scripts/mockgen.go github.com/aws/amazon-vpc-cni-k8s/pkg/awsutils/ec2metadata EC2Metadata mocks/ec2metadata_mocks.go

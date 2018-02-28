@@ -24,9 +24,9 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/aws/amazon-vpc-cni-k8s/pkg/ipwrapper"
-	"github.com/aws/amazon-vpc-cni-k8s/pkg/netlinkwrapper"
-	"github.com/aws/amazon-vpc-cni-k8s/pkg/nswrapper"
+	"github.com/aws/amazon-vpc-cni-k8s/pkg/driver/ipwrapper"
+	"github.com/aws/amazon-vpc-cni-k8s/pkg/driver/netlinkwrapper"
+	"github.com/aws/amazon-vpc-cni-k8s/pkg/driver/nswrapper"
 )
 
 const (

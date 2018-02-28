@@ -22,8 +22,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/aws/amazon-vpc-cni-k8s/pkg/ec2metadata"
-	"github.com/aws/amazon-vpc-cni-k8s/pkg/ec2wrapper"
+	"github.com/aws/amazon-vpc-cni-k8s/pkg/awsutils/ec2metadata"
+	"github.com/aws/amazon-vpc-cni-k8s/pkg/awsutils/ec2wrapper"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/arn"
 	"github.com/aws/aws-sdk-go/aws/awserr"

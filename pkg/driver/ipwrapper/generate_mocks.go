@@ -11,6 +11,6 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-package ec2wrapper
+package ipwrapper
 
-//go:generate go run ../../scripts/mockgen.go github.com/aws/amazon-vpc-cni-k8s/pkg/ec2wrapper EC2 mocks/ec2wrapper_mocks.go
+//go:generate go run ../../scripts/mockgen.go github.com/aws/amazon-vpc-cni-k8s/pkg/driver/ipwrapper IP mocks/ipwrapper_mocks.go

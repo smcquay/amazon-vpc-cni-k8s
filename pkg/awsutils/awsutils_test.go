@@ -23,8 +23,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/aws/amazon-vpc-cni-k8s/pkg/ec2metadata/mocks"
-	"github.com/aws/amazon-vpc-cni-k8s/pkg/ec2wrapper/mocks"
+	"github.com/aws/amazon-vpc-cni-k8s/pkg/awsutils/ec2metadata/mocks"
 )
 
 const (

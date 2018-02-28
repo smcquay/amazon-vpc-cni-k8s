@@ -11,7 +11,6 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-package netlinkwrapper
+package nswrapper
 
-//go:generate go run ../../scripts/mockgen.go github.com/aws/amazon-vpc-cni-k8s/pkg/netlinkwrapper NetLink mocks/netlinkwrapper_mocks.go
-//go:generate go run ../../scripts/mockgen.go github.com/vishvananda/netlink Link mock_netlink/link_mocks.go
+//go:generate go run ../../scripts/mockgen.go github.com/aws/amazon-vpc-cni-k8s/pkg/driver/nswrapper NS mocks/nswrapper_mocks.go
