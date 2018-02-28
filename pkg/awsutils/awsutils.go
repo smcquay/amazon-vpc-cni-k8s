@@ -24,7 +24,6 @@ import (
 
 	"github.com/aws/amazon-vpc-cni-k8s/pkg/ec2metadata"
 	"github.com/aws/amazon-vpc-cni-k8s/pkg/ec2wrapper"
-	"github.com/aws/amazon-vpc-cni-k8s/pkg/resourcegroupstaggingapiwrapper"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/arn"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -106,7 +105,7 @@ type EC2InstanceMetadataCache struct {
 
 	ec2Metadata ec2metadata.EC2Metadata
 	ec2SVC      ec2wrapper.EC2
-	tagSVC      resourcegroupstaggingapiwrapper.ResourceGroupsTaggingAPI
+	tagSVC      ResourceGroupsTaggingAPI
 }
 
 // ENIMetadata contains ENI information retrieved from EC2 meta data service
@@ -125,6 +124,10 @@ type ENIMetadata struct {
 
 	// The ip addresses allocated for the network interface
 	LocalIPv4s []string
+}
+
+type ResourceGroupsTaggingAPI interface {
+	TagResources(input *resourcegroupstaggingapi.TagResourcesInput) (*resourcegroupstaggingapi.TagResourcesOutput, error)
 }
 
 // New creates an EC2InstanceMetadataCache
@@ -149,7 +152,7 @@ func New() (*EC2InstanceMetadataCache, error) {
 	ec2SVC := ec2wrapper.New(sess)
 	cache.ec2SVC = ec2SVC
 
-	tagSVC := resourcegroupstaggingapiwrapper.New(sess)
+	tagSVC := resourcegroupstaggingapi.New(sess)
 	cache.tagSVC = tagSVC
 
 	err = cache.initWithEC2Metadata()
