@@ -15,7 +15,6 @@ package ipamd
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -51,11 +50,11 @@ func (c *IPAMD) SetupHTTP() {
 	serveMux.HandleFunc("/v1/pods", createDebugHandler(func() interface{} {
 		return c.dataStore.GetPodInfos()
 	}))
-	handler := func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "TODO")
-	}
-	serveMux.HandleFunc("/live", handler)
-	serveMux.HandleFunc("/ready", handler)
+	// handler := func(w http.ResponseWriter, r *http.Request) {
+	// 	fmt.Fprintln(w, "TODO")
+	// }
+	// serveMux.HandleFunc("/live", handler)
+	serveMux.HandleFunc("/healthz", c.healthz)
 	serveMux.Handle("/metrics", promhttp.Handler())
 	s := &http.Server{
 		Addr:           httpPort,
@@ -65,4 +64,14 @@ func (c *IPAMD) SetupHTTP() {
 		MaxHeaderBytes: 1 << 20,
 	}
 	log.Fatal(s.ListenAndServe())
+}
+
+func (i *IPAMD) healthz(w http.ResponseWriter, r *http.Request) {
+	if !i.started {
+		w.WriteHeader(500)
+		w.Write([]byte("not started"))
+		return
+	}
+	w.WriteHeader(200)
+	w.Write([]byte("ok"))
 }

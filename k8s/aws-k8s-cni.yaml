@@ -27,6 +27,8 @@ spec:
       containers:
       - image: 602401143452.dkr.ecr.us-west-2.amazonaws.com/amazon-k8s-cni:0.1.3
         name: amazon-vpc-cni-k8s
+        ports:
+          - containerPort: 51678
         env:
           - name: ECS_CNI_LOGLEVEL
             value: DEBUG

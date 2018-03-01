@@ -57,6 +57,7 @@ type IPAMD struct {
 	maxENI int
 
 	metrics *metrics.Metrics
+	started bool
 }
 
 // New retrieves IP address usage information from Instance MetaData service and Kubelet
@@ -84,6 +85,7 @@ func New() (*IPAMD, error) {
 		return nil, err
 	}
 	c.metrics = m
+	c.started = true
 
 	return c, nil
 }
