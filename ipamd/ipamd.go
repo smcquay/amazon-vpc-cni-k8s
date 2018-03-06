@@ -71,7 +71,7 @@ func New() (*IPAMD, error) {
 	}
 
 	c.awsClient = client
-	err = c.nodeInit()
+	err = c.init()
 	if err != nil {
 		return nil, err
 	}
@@ -79,14 +79,7 @@ func New() (*IPAMD, error) {
 	return c, nil
 }
 
-//TODO(aws): need to break this function down(comments from CR)
-func (c *IPAMD) nodeInit() error {
-	enis, err := c.awsClient.GetAttachedENIs()
-	if err != nil {
-		log.Error("Failed to retrive ENI info")
-		return errors.New("ipamd init: failed to retrieve attached ENIs info")
-	}
-
+func (c *IPAMD) initNetwork() error {
 	_, vpcCIDR, err := net.ParseCIDR(c.awsClient.GetVPCIPv4CIDR())
 	if err != nil {
 		log.Error("Failed to parse VPC IPv4 CIDR", err.Error())
@@ -94,14 +87,26 @@ func (c *IPAMD) nodeInit() error {
 	}
 
 	primaryIP := net.ParseIP(c.awsClient.GetLocalIPv4())
-	err = c.networkClient.SetupHostNetwork(vpcCIDR, &primaryIP)
-	if err != nil {
+	if err = c.networkClient.SetupHostNetwork(vpcCIDR, &primaryIP); err != nil {
 		log.Error("Failed to setup host network", err)
 		return errors.Wrap(err, "ipamd init: failed to setup host network")
 	}
+	return nil
+}
+
+//TODO(aws): need to break this function down(comments from CR)
+func (c *IPAMD) init() error {
+	if err := c.initNetwork(); err != nil {
+		return err
+	}
+
+	enis, err := c.awsClient.GetAttachedENIs()
+	if err != nil {
+		log.Error("Failed to retrive ENI info")
+		return errors.New("ipamd init: failed to retrieve attached ENIs info")
+	}
 
 	c.dataStore = datastore.NewDataStore()
-
 	for _, eni := range enis {
 		log.Debugf("Discovered ENI %s", eni.ENIID)
 
