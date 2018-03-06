@@ -163,6 +163,8 @@ func (c *IPAMD) StartNodeIPPoolManager() {
 
 func (c *IPAMD) updateIPPoolIfRequired() {
 	total, used := c.dataStore.GetStats()
+	c.metrics.IPPool(total, used, c.currentMaxAddrsPerENI, c.maxAddrsPerENI)
+
 	if (total - used) <= c.currentMaxAddrsPerENI {
 		c.increaseIPPool()
 	} else if total-used > 2*c.currentMaxAddrsPerENI {
@@ -265,6 +267,7 @@ func (c *IPAMD) addENIaddressesToDataStore(ec2Addrs []*ec2.NetworkInterfacePriva
 			log.Warnf("Failed to increase ip pool, failed to add ip %s to data store", ec2Addr.PrivateIpAddress)
 			// continue to add next address
 			// TODO(aws): need to add health stats for err
+			c.metrics.FailedENIAlloc()
 		}
 	}
 }

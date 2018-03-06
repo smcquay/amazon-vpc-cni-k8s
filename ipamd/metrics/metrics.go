@@ -30,3 +30,7 @@ func New() (*Metrics, error) {
 func (m *Metrics) IPPool(total, used, currentMaxAddrsPerENI, maxAddrsPerENI int) {
 
 }
+
+func (m *Metrics) FailedENIAlloc() {
+
+}
