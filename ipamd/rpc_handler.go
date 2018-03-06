@@ -61,13 +61,14 @@ func (s *server) DelNetwork(ctx context.Context, in *pb.DelNetworkRequest) (*pb.
 		in.IPv4Addr, in.K8S_POD_NAME, in.K8S_POD_NAMESPACE, in.K8S_POD_INFRA_CONTAINER_ID)
 
 	var err error
-	if ip, deviceNumber, err := s.ipamContext.dataStore.UnAssignPodIPv4Address(
+	ip, deviceNumber, err := s.ipamContext.dataStore.UnAssignPodIPv4Address(
 		&k8sapi.K8SPodInfo{
 			Name:      in.K8S_POD_NAME,
 			Namespace: in.K8S_POD_NAMESPACE,
 			Container: in.K8S_POD_INFRA_CONTAINER_ID,
-		}); err != nil && err == datastore.ErrUnknownPod {
+		})
 
+	if err != nil && err == datastore.ErrUnknownPod {
 		// If L-IPAMD restarts, the pod's IP address are assigned by only pod's name and namespace due to kubelet's introspection.
 		ip, deviceNumber, err = s.ipamContext.dataStore.UnAssignPodIPv4Address(
 			&k8sapi.K8SPodInfo{
