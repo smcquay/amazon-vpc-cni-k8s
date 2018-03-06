@@ -18,10 +18,11 @@
 package mock_rpc
 
 import (
-	context "golang.org/x/net/context"
 	reflect "reflect"
 
-	rpc "github.com/aws/amazon-vpc-cni-k8s/rpc"
+	context "golang.org/x/net/context"
+
+	rpc "github.com/aws/amazon-vpc-cni-k8s/ipamd/rpc"
 	gomock "github.com/golang/mock/gomock"
 	grpc "google.golang.org/grpc"
 )
