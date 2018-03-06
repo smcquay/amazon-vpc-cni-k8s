@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/aws/amazon-ecs-cni-plugins/pkg/logger"
 	"github.com/aws/amazon-vpc-cni-k8s/pkg/awsutils"
 
 	log "github.com/cihub/seelog"
@@ -13,14 +12,14 @@ import (
 
 var testEC2Instance *awsutils.EC2InstanceMetadataCache
 
-const (
-	defaultLogFilePath = "/var/log/verify-aws.log"
-)
+// const (
+// 	defaultLogFilePath = "/var/log/verify-aws.log"
+// )
 
 func main() {
 	var testOK = true
 	defer log.Flush()
-	logger.SetupLogger(logger.GetLogFileLocation(defaultLogFilePath))
+	// logger.SetupLogger(logger.GetLogFileLocation(defaultLogFilePath))
 	// verify API: GetInstanceMetadata
 	testEC2Instance, _ = awsutils.New()
 

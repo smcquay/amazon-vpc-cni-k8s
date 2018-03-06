@@ -27,8 +27,6 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/aws/amazon-ecs-cni-plugins/pkg/logger"
-
 	"github.com/containernetworking/cni/pkg/skel"
 	"github.com/containernetworking/cni/pkg/types"
 	"github.com/containernetworking/cni/pkg/types/current"
@@ -42,9 +40,9 @@ import (
 )
 
 const (
-	ipamDAddress       = "localhost:50051"
-	defaultLogFilePath = "/var/log/aws-routed-eni/plugin.log"
-	maxVethNameLen     = 10
+	ipamDAddress   = "localhost:50051"
+	maxVethNameLen = 10
+	// defaultLogFilePath = "/var/log/aws-routed-eni/plugin.log"
 )
 
 // NetConf stores the common network config for CNI plugin
@@ -273,7 +271,7 @@ func del(args *skel.CmdArgs, cniTypes typeswrapper.CNITYPES, grpcClient grpcwrap
 
 func main() {
 	defer log.Flush()
-	logger.SetupLogger(logger.GetLogFileLocation(defaultLogFilePath))
+	// logger.SetupLogger(logger.GetLogFileLocation(defaultLogFilePath))
 
 	skel.PluginMain(cmdAdd, cmdDel, cniSpecVersion.All)
 }

@@ -17,15 +17,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/aws/amazon-ecs-cni-plugins/pkg/logger"
-
 	"github.com/aws/amazon-vpc-cni-k8s/ipamd"
 	log "github.com/cihub/seelog"
 )
 
-const (
-	defaultLogFilePath = "/host/var/log/aws-routed-eni/ipamd.log"
-)
+// const (
+// 	defaultLogFilePath = "/host/var/log/aws-routed-eni/ipamd.log"
+// )
 
 var (
 	Version    = "0.1.3"
@@ -34,7 +32,7 @@ var (
 
 func main() {
 	defer log.Flush()
-	logger.SetupLogger(logger.GetLogFileLocation(defaultLogFilePath))
+	// logger.SetupLogger(logger.GetLogFileLocation(defaultLogFilePath))
 	log.Infof("Starting L-IPAMD %v %v  ...", Version, fmt.Sprintf("(%v)", GitVersion))
 
 	aws_k8s_agent, err := ipamd.New()
