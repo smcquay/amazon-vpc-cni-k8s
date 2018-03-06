@@ -93,6 +93,7 @@ type PodIPInfo struct {
 
 // DataStore contains node level ENI/IP
 type DataStore struct {
+	// XXX (sm): add metrics
 	total      int
 	assigned   int
 	eniIPPools map[string]*ENIIPPool
@@ -100,6 +101,7 @@ type DataStore struct {
 	lock       sync.RWMutex
 }
 
+// why not map[PodKey]PodIPInfo?
 // PodInfos contains pods IP information which uses key name_namespace_container
 type PodInfos map[string]PodIPInfo
 
@@ -176,6 +178,7 @@ func (ds *DataStore) AssignPodIPv4Address(k8sPod *k8sapi.K8SPodInfo) (string, in
 			return ipAddr.IP, ipAddr.DeviceNumber, nil
 		}
 
+		// XXX (sm): this is a good place for a counter of some variety.
 		//TODO handle this bug assert?, may need to add a counter here, if counter is too high, need to mark node as unhealthy...
 		// this is a bug that the caller invoke multiple times to assign(PodName/NameSpace -> a different IPaddress).
 		log.Errorf("AssignPodIPv4Address: current IP %s is changed to IP %s for %s", ipAddr, k8sPod.IP, logContainer(k8sPod))
@@ -197,6 +200,7 @@ func (ds *DataStore) assignPodIPv4AddressUnsafe(k8sPod *k8sapi.K8SPodInfo) (stri
 		}
 		for _, addr := range eni.IPv4Addresses {
 			if k8sPod.IP == addr.address {
+				// TODO (sm): maybe handle this in startup befor letting the rest of the system start and race here?
 				// After L-IPAM restart and built IP warm-pool, it needs to take the existing running pod IP out of the pool.
 				if !addr.Assigned {
 					ds.assigned++
@@ -224,6 +228,7 @@ func (ds *DataStore) assignPodIPv4AddressUnsafe(k8sPod *k8sapi.K8SPodInfo) (stri
 	return "", 0, errors.New("datastore: no available IP addresses")
 }
 
+// Should maybe implement prometheus.Collector?
 // GetStats returns statistics
 // it returns total number of IP addresses, number of assigned IP addresses
 func (ds *DataStore) GetStats() (int, int) {

@@ -41,7 +41,9 @@ func main() {
 		os.Exit(1)
 	}
 
+	// TODO (sm): add shutdown
 	go ipamd.StartNodeIPPoolManager()
 	go ipamd.SetupHTTP()
+	// XXX (sm): deal with error.
 	ipamd.RunRPCHandler()
 }

@@ -70,6 +70,8 @@ func New() (*IPAMD, error) {
 
 	client, err := awsutils.New()
 	if err != nil {
+		/// XXX (sm): generally I'd like to remove superflous logs like this.
+		//This should get returned up to main.
 		log.Errorf("Failed to initialize awsutil interface %v", err)
 		return nil, errors.Wrap(err, "ipamd: can not initialize with AWS SDK interface")
 	}
@@ -159,12 +161,14 @@ func (c *IPAMD) init() error {
 func (c *IPAMD) StartNodeIPPoolManager() {
 	for {
 		time.Sleep(ipPoolMonitorInterval)
+		// XXX (sm): return error and log here.
 		c.updateIPPoolIfRequired()
 	}
 }
 
 func (c *IPAMD) updateIPPoolIfRequired() {
 	total, used := c.dataStore.GetStats()
+	// XXX (sm): not sure about this signature
 	c.metrics.IPPool(total, used, c.currentMaxAddrsPerENI, c.maxAddrsPerENI)
 
 	if (total - used) <= c.currentMaxAddrsPerENI {
@@ -178,6 +182,7 @@ func isAttachmentLimitExceededError(err error) bool {
 	return strings.Contains(err.Error(), "AttachmentLimitExceeded")
 }
 
+// XXX (sm): return errors
 func (c *IPAMD) increaseIPPool() {
 	if (c.maxENI > 0) && (c.maxENI == c.dataStore.GetENIs()) {
 		log.Debugf("Skipping increase IPPOOL due to max ENI already attached to the instance : %d", c.maxENI)

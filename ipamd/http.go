@@ -38,6 +38,7 @@ func createDebugHandler(fetcher func() interface{}) func(w http.ResponseWriter, 
 	}
 }
 
+// XXX (sm): generally I give a servemux to this function and return an http.Handler
 // SetupHTTP sets up introspection service endpoint and prometheus metrics.
 func (c *IPAMD) SetupHTTP() {
 	serveMux := http.NewServeMux()
@@ -68,10 +69,13 @@ func (c *IPAMD) SetupHTTP() {
 
 func (i *IPAMD) healthz(w http.ResponseWriter, r *http.Request) {
 	if !i.started {
+		// XXX: http.Status...
 		w.WriteHeader(500)
 		w.Write([]byte("not started"))
 		return
 	}
+
+	// XXX (sm) just return, http.StatusOK is a sane default value.
 	w.WriteHeader(200)
 	w.Write([]byte("ok"))
 }
