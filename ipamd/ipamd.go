@@ -40,8 +40,8 @@ const (
 	eniAttachTime         = 10 * time.Second
 )
 
-// IPAMContext contains node level control information
-type IPAMContext struct {
+// IPAMD contains node level control information
+type IPAMD struct {
 	awsClient     awsutils.APIs
 	dataStore     datastore.DS
 	k8sClient     k8sapi.K8SAPIs
@@ -49,6 +49,7 @@ type IPAMContext struct {
 
 	currentMaxAddrsPerENI int
 	maxAddrsPerENI        int
+
 	// maxENI indicate the maximum number of ENIs can be attached to the instance
 	// It is initialized to 0 and it is set to current number of ENIs attached
 	// when ipamD receives AttachmentLimitExceeded error
@@ -57,8 +58,8 @@ type IPAMContext struct {
 
 // New retrieves IP address usage information from Instance MetaData service and Kubelet
 // then initializes IP address pool data store
-func New() (*IPAMContext, error) {
-	c := &IPAMContext{
+func New() (*IPAMD, error) {
+	c := &IPAMD{
 		k8sClient:     k8sapi.New(),
 		networkClient: networkutils.New(),
 	}
@@ -79,7 +80,7 @@ func New() (*IPAMContext, error) {
 }
 
 //TODO(aws): need to break this function down(comments from CR)
-func (c *IPAMContext) nodeInit() error {
+func (c *IPAMD) nodeInit() error {
 	enis, err := c.awsClient.GetAttachedENIs()
 	if err != nil {
 		log.Error("Failed to retrive ENI info")
@@ -139,14 +140,14 @@ func (c *IPAMContext) nodeInit() error {
 }
 
 // StartNodeIPPoolManager monitors the IP Pool, add or del them when it is required.
-func (c *IPAMContext) StartNodeIPPoolManager() {
+func (c *IPAMD) StartNodeIPPoolManager() {
 	for {
 		time.Sleep(ipPoolMonitorInterval)
 		c.updateIPPoolIfRequired()
 	}
 }
 
-func (c *IPAMContext) updateIPPoolIfRequired() {
+func (c *IPAMD) updateIPPoolIfRequired() {
 	if c.nodeIPPoolTooLow() {
 		c.increaseIPPool()
 	} else if c.nodeIPPoolTooHigh() {
@@ -154,7 +155,7 @@ func (c *IPAMContext) updateIPPoolIfRequired() {
 	}
 }
 
-func (c *IPAMContext) decreaseIPPool() {
+func (c *IPAMD) decreaseIPPool() {
 	eni, err := c.dataStore.FreeENI()
 	if err != nil {
 		log.Errorf("Failed to decrease pool %v", err)
@@ -167,8 +168,7 @@ func isAttachmentLimitExceededError(err error) bool {
 	return strings.Contains(err.Error(), "AttachmentLimitExceeded")
 }
 
-func (c *IPAMContext) increaseIPPool() {
-
+func (c *IPAMD) increaseIPPool() {
 	if (c.maxENI > 0) && (c.maxENI == c.dataStore.GetENIs()) {
 		log.Debugf("Skipping increase IPPOOL due to max ENI already attached to the instance : %d", c.maxENI)
 		return
@@ -208,7 +208,7 @@ func (c *IPAMContext) increaseIPPool() {
 // 1) add ENI to datastore
 // 2) add all ENI's secondary IP addresses to datastore
 // 3) setup linux eni related networking stack.
-func (c *IPAMContext) setupENI(eni string, eniMetadata awsutils.ENIMetadata) error {
+func (c *IPAMD) setupENI(eni string, eniMetadata awsutils.ENIMetadata) error {
 	// Have discovered the attached ENI from metadata service
 	// add eni's IP to IP pool
 	err := c.dataStore.AddENI(eni, int(eniMetadata.DeviceNumber), (eni == c.awsClient.GetPrimaryENI()))
@@ -240,7 +240,7 @@ func (c *IPAMContext) setupENI(eni string, eniMetadata awsutils.ENIMetadata) err
 
 }
 
-func (c *IPAMContext) addENIaddressesToDataStore(ec2Addrs []*ec2.NetworkInterfacePrivateIpAddress, eni string) {
+func (c *IPAMD) addENIaddressesToDataStore(ec2Addrs []*ec2.NetworkInterfacePrivateIpAddress, eni string) {
 	for _, ec2Addr := range ec2Addrs {
 		if aws.BoolValue(ec2Addr.Primary) {
 			continue
@@ -255,7 +255,7 @@ func (c *IPAMContext) addENIaddressesToDataStore(ec2Addrs []*ec2.NetworkInterfac
 }
 
 // returns all addresses on eni, the primary adderss on eni, error
-func (c *IPAMContext) getENIaddresses(eni string) ([]*ec2.NetworkInterfacePrivateIpAddress, string, error) {
+func (c *IPAMD) getENIaddresses(eni string) ([]*ec2.NetworkInterfacePrivateIpAddress, string, error) {
 	ec2Addrs, _, err := c.awsClient.DescribeENI(eni)
 	if err != nil {
 		return nil, "", errors.Wrapf(err, "fail to find eni addresses for eni %s", eni)
@@ -271,7 +271,7 @@ func (c *IPAMContext) getENIaddresses(eni string) ([]*ec2.NetworkInterfacePrivat
 	return nil, "", errors.Wrapf(err, "faind to find eni's primary address for eni %s", eni)
 }
 
-func (c *IPAMContext) waitENIAttached(eni string) (awsutils.ENIMetadata, error) {
+func (c *IPAMD) waitENIAttached(eni string) (awsutils.ENIMetadata, error) {
 	// wait till eni is showup in the instance meta data service
 	for retry := 0; retry < maxRetryCheckENI; retry++ {
 		enis, err := c.awsClient.GetAttachedENIs()
@@ -298,7 +298,7 @@ func (c *IPAMContext) waitENIAttached(eni string) (awsutils.ENIMetadata, error) 
 }
 
 //nodeIPPoolTooLow returns true if IP pool is below low threshhold
-func (c *IPAMContext) nodeIPPoolTooLow() bool {
+func (c *IPAMD) nodeIPPoolTooLow() bool {
 	total, used := c.dataStore.GetStats()
 	// log.Debugf("IP pool stats: total=%d, used=%d, c.currentMaxAddrsPerENI =%d, c.maxAddrsPerENI = %d",
 	// 	total, used, c.currentMaxAddrsPerENI, c.maxAddrsPerENI)
@@ -307,7 +307,7 @@ func (c *IPAMContext) nodeIPPoolTooLow() bool {
 }
 
 // NodeIPPoolTooHigh returns true if IP pool is above high threshhold
-func (c *IPAMContext) nodeIPPoolTooHigh() bool {
+func (c *IPAMD) nodeIPPoolTooHigh() bool {
 	total, used := c.dataStore.GetStats()
 
 	// log.Debugf("IP pool stats: total=%d, used=%d, c.currentMaxAddrsPerENI =%d, c.maxAddrsPerENI = %d",

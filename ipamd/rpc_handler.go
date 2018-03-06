@@ -30,18 +30,14 @@ import (
 )
 
 const (
-	port = "127.0.0.1:50051"
+	grpcPort = "127.0.0.1:50051"
 )
 
-type server struct {
-	ipamContext *IPAMContext
-}
-
 // AddNetwork processes CNI add network request and return an IP address for container
-func (s *server) AddNetwork(ctx context.Context, in *pb.AddNetworkRequest) (*pb.AddNetworkReply, error) {
+func (i *IPAMD) AddNetwork(ctx context.Context, in *pb.AddNetworkRequest) (*pb.AddNetworkReply, error) {
 	log.Infof("Received AddNetwork for NS %s, Pod %s, NameSpace %s, Container %s, ifname %s", in.Netns, in.K8S_POD_NAME, in.K8S_POD_NAMESPACE, in.K8S_POD_INFRA_CONTAINER_ID, in.IfName)
 
-	addr, deviceNumber, err := s.ipamContext.dataStore.AssignPodIPv4Address(&k8sapi.K8SPodInfo{
+	addr, deviceNumber, err := i.dataStore.AssignPodIPv4Address(&k8sapi.K8SPodInfo{
 		Name:      in.K8S_POD_NAME,
 		Namespace: in.K8S_POD_NAMESPACE,
 		Container: in.K8S_POD_INFRA_CONTAINER_ID})
@@ -56,12 +52,12 @@ func (s *server) AddNetwork(ctx context.Context, in *pb.AddNetworkRequest) (*pb.
 	}, nil
 }
 
-func (s *server) DelNetwork(ctx context.Context, in *pb.DelNetworkRequest) (*pb.DelNetworkReply, error) {
+func (i *IPAMD) DelNetwork(ctx context.Context, in *pb.DelNetworkRequest) (*pb.DelNetworkReply, error) {
 	log.Infof("Received DelNetwork for IP %s, Pod %s, Namespace %s, Container %s",
 		in.IPv4Addr, in.K8S_POD_NAME, in.K8S_POD_NAMESPACE, in.K8S_POD_INFRA_CONTAINER_ID)
 
 	var err error
-	ip, deviceNumber, err := s.ipamContext.dataStore.UnAssignPodIPv4Address(
+	ip, deviceNumber, err := i.dataStore.UnAssignPodIPv4Address(
 		&k8sapi.K8SPodInfo{
 			Name:      in.K8S_POD_NAME,
 			Namespace: in.K8S_POD_NAMESPACE,
@@ -70,7 +66,7 @@ func (s *server) DelNetwork(ctx context.Context, in *pb.DelNetworkRequest) (*pb.
 
 	if err != nil && err == datastore.ErrUnknownPod {
 		// If L-IPAMD restarts, the pod's IP address are assigned by only pod's name and namespace due to kubelet's introspection.
-		ip, deviceNumber, err = s.ipamContext.dataStore.UnAssignPodIPv4Address(
+		ip, deviceNumber, err = i.dataStore.UnAssignPodIPv4Address(
 			&k8sapi.K8SPodInfo{
 				Name:      in.K8S_POD_NAME,
 				Namespace: in.K8S_POD_NAMESPACE,
@@ -78,22 +74,24 @@ func (s *server) DelNetwork(ctx context.Context, in *pb.DelNetworkRequest) (*pb.
 	}
 
 	log.Infof("Send DelNetworkReply: IPv4Addr %s, DeviceNumber: %d, err: %v", ip, deviceNumber, err)
-	return &pb.DelNetworkReply{Success: err == nil,
+	return &pb.DelNetworkReply{
+		Success:      err == nil,
 		IPv4Addr:     ip,
 		DeviceNumber: int32(deviceNumber),
 	}, nil
 }
 
 // RunRPCHandler handles request from gRPC
-func (c *IPAMContext) RunRPCHandler() error {
-	lis, err := net.Listen("tcp", port)
+func (c *IPAMD) RunRPCHandler() error {
+	lis, err := net.Listen("tcp", grpcPort)
 	if err != nil {
-		log.Errorf("Failed to listen gRPC port: %v", err)
+		log.Errorf("Failed to listen gRPC port %v: %v", grpcPort, err)
 		return errors.Wrap(err, "ipamd: failed to listen to gRPC port")
 	}
 
 	s := grpc.NewServer()
-	pb.RegisterCNIBackendServer(s, &server{ipamContext: c})
+	// pb.RegisterCNIBackendServer(s, &server{ipamContext: c})
+	pb.RegisterCNIBackendServer(s, c)
 	// Register reflection service on gRPC server.
 	reflection.Register(s)
 	if err := s.Serve(lis); err != nil {
