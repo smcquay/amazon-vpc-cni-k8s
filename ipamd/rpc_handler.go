@@ -83,7 +83,7 @@ func (i *IPAMD) DelNetwork(ctx context.Context, in *pb.DelNetworkRequest) (*pb.D
 }
 
 // RunRPCHandler handles request from gRPC
-func (c *IPAMD) RunRPCHandler() error {
+func (i *IPAMD) RunRPCHandler() error {
 	lis, err := net.Listen("tcp", grpcPort)
 	if err != nil {
 		log.Errorf("Failed to listen gRPC port %v: %v", grpcPort, err)
@@ -92,7 +92,7 @@ func (c *IPAMD) RunRPCHandler() error {
 
 	s := grpc.NewServer()
 	// pb.RegisterCNIBackendServer(s, &server{ipamContext: c})
-	pb.RegisterCNIBackendServer(s, c)
+	pb.RegisterCNIBackendServer(s, i)
 	// Register reflection service on gRPC server.
 	reflection.Register(s)
 	if err := s.Serve(lis); err != nil {
