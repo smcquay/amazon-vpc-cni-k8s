@@ -24,6 +24,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/aws/amazon-vpc-cni-k8s/pkg/awsutils/ec2metadata/mocks"
+	"github.com/aws/amazon-vpc-cni-k8s/pkg/awsutils/ec2wrapper/mocks"
 )
 
 const (

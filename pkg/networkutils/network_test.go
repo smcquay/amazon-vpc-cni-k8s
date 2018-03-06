@@ -22,7 +22,6 @@ import (
 
 	"github.com/vishvananda/netlink"
 
-	mocks_ip "github.com/aws/amazon-vpc-cni-k8s/pkg/driver/ipwrapper/mocks"
 	"github.com/aws/amazon-vpc-cni-k8s/pkg/driver/netlinkwrapper/mock_netlink"
 	"github.com/aws/amazon-vpc-cni-k8s/pkg/driver/netlinkwrapper/mocks"
 )
@@ -42,19 +41,13 @@ const (
 	testeniSubnet    = "10.10.0.0/16"
 )
 
-func setup(t *testing.T) (*gomock.Controller,
-	*mock_netlinkwrapper.MockNetLink,
-	*mocks_ip.MockIP,
-	*mock_nswrapper.MockNS) {
+func setup(t *testing.T) (*gomock.Controller, *mock_netlinkwrapper.MockNetLink) {
 	ctrl := gomock.NewController(t)
-	return ctrl,
-		mock_netlinkwrapper.NewMockNetLink(ctrl),
-		mocks_ip.NewMockIP(ctrl),
-		mock_nswrapper.NewMockNS(ctrl)
+	return ctrl, mock_netlinkwrapper.NewMockNetLink(ctrl)
 }
 
 func TestSetupENINetwork(t *testing.T) {
-	ctrl, mockNetLink, _, _ := setup(t)
+	ctrl, mockNetLink := setup(t)
 	defer ctrl.Finish()
 
 	hwAddr, err := net.ParseMAC(testMAC1)
@@ -96,7 +89,7 @@ func TestSetupENINetwork(t *testing.T) {
 }
 
 func TestSetupENINetworkPrimary(t *testing.T) {
-	ctrl, mockNetLink, _, _ := setup(t)
+	ctrl, mockNetLink := setup(t)
 	defer ctrl.Finish()
 
 	err := setupENINetwork(testeniIP, testMAC2, 0, testeniSubnet, mockNetLink)

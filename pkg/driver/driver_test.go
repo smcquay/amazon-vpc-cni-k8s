@@ -23,10 +23,11 @@ import (
 
 	"github.com/vishvananda/netlink"
 
-	"github.com/aws/amazon-vpc-cni-k8s/pkg/cninswrapper/mock_ns"
+	"github.com/aws/amazon-vpc-cni-k8s/pkg/driver/cninswrapper/mock_ns"
 	mocks_ip "github.com/aws/amazon-vpc-cni-k8s/pkg/driver/ipwrapper/mocks"
 	"github.com/aws/amazon-vpc-cni-k8s/pkg/driver/netlinkwrapper/mock_netlink"
 	"github.com/aws/amazon-vpc-cni-k8s/pkg/driver/netlinkwrapper/mocks"
+	"github.com/aws/amazon-vpc-cni-k8s/pkg/driver/nswrapper/mocks"
 )
 
 const (
