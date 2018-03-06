@@ -15,11 +15,11 @@ package k8sapi
 
 import (
 	"encoding/json"
+	"io/ioutil"
+	"net/http"
 
 	"k8s.io/kubernetes/pkg/api"
 
-	"github.com/aws/amazon-vpc-cni-k8s/pkg/httpwrapper"
-	"github.com/aws/amazon-vpc-cni-k8s/pkg/ioutilwrapper"
 	"github.com/pkg/errors"
 
 	log "github.com/cihub/seelog"
@@ -84,45 +84,40 @@ func New() K8SAPIs {
 	return &client{}
 }
 
-// K8SGetLocalPodIPs queries kubelet about the running Pod information
-func (k8s *client) K8SGetLocalPodIPs(localIP string) ([]*K8SPodInfo, error) {
-	return k8sGetLocalPodIPs(httpwrapper.New(), ioutilwrapper.NewIOUtil(), localIP)
+type Getter interface {
+	Get(url string) (resp *http.Response, err error)
 }
 
-func k8sGetLocalPodIPs(http httpwrapper.HTTP, ioutil ioutilwrapper.IOUtil, localIP string) ([]*K8SPodInfo, error) {
+// K8SGetLocalPodIPs queries kubelet about the running Pod information
+func (k8s *client) K8SGetLocalPodIPs(localIP string) ([]*K8SPodInfo, error) {
+	return k8sGetLocalPodIPs(http.DefaultClient, localIP)
+}
+
+func k8sGetLocalPodIPs(http Getter, localIP string) ([]*K8SPodInfo, error) {
 	var podsInfo []*K8SPodInfo
 
-	respBody, err := http.Get(kubeletURL)
+	// TODO(tvi): Simplify
+	resp, err := http.Get(kubeletURL)
 	if err != nil {
 		log.Errorf("Failed to query kubelet on localhost: %v", err)
-
-		if respBody != nil {
-			respBody.Close()
-		}
-
 		// retry using node's primary IP
-		respBody, err = http.Get(kubeletURLPrefix + localIP + kubeletURLSurfix)
-
+		resp, err = http.Get(kubeletURLPrefix + localIP + kubeletURLSurfix)
 		if err != nil {
 			log.Errorf("Failed to query kubnet on primary interface %s: %v", localIP, err)
 			return podsInfo, errors.Wrap(err, "query kubelet: failed to query kubelet")
 		}
 	}
 
-	defer respBody.Close()
+	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(respBody)
-
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Errorf("Failed to read kubelet's response body")
 		return nil, errors.Wrap(err, "query kublet: failed to read response body")
 	}
 
 	var podlist podList
-
-	err = json.Unmarshal(body, &podlist)
-
-	if err != nil {
+	if err = json.Unmarshal(body, &podlist); err != nil {
 		log.Errorf("Failed to unmashal pod list: %v", err)
 		return nil, errors.Wrap(err, "query kubelet: failed to unmarshal pod list")
 	}
@@ -132,7 +127,9 @@ func k8sGetLocalPodIPs(http httpwrapper.HTTP, ioutil ioutilwrapper.IOUtil, local
 			podsInfo = append(podsInfo, &K8SPodInfo{
 				Name:      pod.Metadata.Name,
 				Namespace: pod.Metadata.Namespace,
-				IP:        pod.Status.PodIP})
+				IP:        pod.Status.PodIP,
+			})
+
 			log.Debugf("Discovered %d podIP %s, name: %s, namespace: %s from kubelet",
 				idx, pod.Status.PodIP, pod.Metadata.Name, pod.Metadata.Namespace)
 		}
