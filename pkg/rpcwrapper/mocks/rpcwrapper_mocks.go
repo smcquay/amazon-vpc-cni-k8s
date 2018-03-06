@@ -20,7 +20,7 @@ package mock_rpcwrapper
 import (
 	reflect "reflect"
 
-	rpc "github.com/aws/amazon-vpc-cni-k8s/rpc"
+	rpc "github.com/aws/amazon-vpc-cni-k8s/ipamd/rpc"
 	gomock "github.com/golang/mock/gomock"
 	"google.golang.org/grpc"
 )
