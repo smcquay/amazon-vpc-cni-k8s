@@ -22,9 +22,6 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"k8s.io/kubernetes/pkg/api"
-
-	"github.com/aws/amazon-vpc-cni-k8s/pkg/httpwrapper/mocks"
-	"github.com/aws/amazon-vpc-cni-k8s/pkg/ioutilwrapper/mocks"
 )
 
 const (
