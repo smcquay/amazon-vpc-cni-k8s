@@ -160,15 +160,6 @@ func (c *IPAMD) updateIPPoolIfRequired() {
 	}
 }
 
-func (c *IPAMD) decreaseIPPool() {
-	eni, err := c.dataStore.FreeENI()
-	if err != nil {
-		log.Errorf("Failed to decrease pool %v", err)
-		return
-	}
-	c.awsClient.FreeENI(eni)
-}
-
 func isAttachmentLimitExceededError(err error) bool {
 	return strings.Contains(err.Error(), "AttachmentLimitExceeded")
 }
@@ -207,6 +198,15 @@ func (c *IPAMD) increaseIPPool() {
 		log.Errorf("Failed to increase pool size: %v", err)
 		return
 	}
+}
+
+func (c *IPAMD) decreaseIPPool() {
+	eni, err := c.dataStore.FreeENI()
+	if err != nil {
+		log.Errorf("Failed to decrease pool %v", err)
+		return
+	}
+	c.awsClient.FreeENI(eni)
 }
 
 // setupENI does following:
