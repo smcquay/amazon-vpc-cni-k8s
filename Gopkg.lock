@@ -23,12 +23,6 @@
   version = "v1.15.2"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/aws/amazon-ecs-cni-plugins"
-  packages = ["pkg/logger"]
-  revision = "17438ddf497765b2c43bfad94d4c7d9c89b2be8e"
-
-[[projects]]
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -433,6 +427,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "196035bf0d4e9be153b1a909fa12d2fdfa22ecb6c66101379e4a2bf98287bd57"
+  inputs-digest = "5cbcf7a78f0d14f34a95b4d76e9dcf1a0dec2c3c75f1242356926049a47a8051"
   solver-name = "gps-cdcl"
   solver-version = 1
