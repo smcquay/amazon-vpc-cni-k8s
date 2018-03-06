@@ -33,7 +33,7 @@ const (
 	grpcPort = "127.0.0.1:50051"
 )
 
-// AddNetwork processes CNI add network request and return an IP address for container
+// AddNetwork processes CNI add network request and return an IP address for container.
 func (i *IPAMD) AddNetwork(ctx context.Context, in *pb.AddNetworkRequest) (*pb.AddNetworkReply, error) {
 	log.Infof("Received AddNetwork for NS %s, Pod %s, NameSpace %s, Container %s, ifname %s", in.Netns, in.K8S_POD_NAME, in.K8S_POD_NAMESPACE, in.K8S_POD_INFRA_CONTAINER_ID, in.IfName)
 
@@ -52,6 +52,7 @@ func (i *IPAMD) AddNetwork(ctx context.Context, in *pb.AddNetworkRequest) (*pb.A
 	}, nil
 }
 
+// DelNetwork processes CNI delete network request.
 func (i *IPAMD) DelNetwork(ctx context.Context, in *pb.DelNetworkRequest) (*pb.DelNetworkReply, error) {
 	log.Infof("Received DelNetwork for IP %s, Pod %s, Namespace %s, Container %s",
 		in.IPv4Addr, in.K8S_POD_NAME, in.K8S_POD_NAMESPACE, in.K8S_POD_INFRA_CONTAINER_ID)
