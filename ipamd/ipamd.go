@@ -205,8 +205,7 @@ func (c *IPAMD) increaseIPPool() {
 		return
 	}
 
-	err = c.setupENI(eni, eniMetadata)
-	if err != nil {
+	if err := c.setupENI(eni, eniMetadata); err != nil {
 		log.Errorf("Failed to increase pool size: %v", err)
 		return
 	}
