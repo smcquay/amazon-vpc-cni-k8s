@@ -36,9 +36,8 @@ func main() {
 	log.Infof("Starting L-IPAMD %v %v  ...", Version, fmt.Sprintf("(%v)", GitVersion))
 
 	aws_k8s_agent, err := ipamd.New()
-
 	if err != nil {
-		log.Error("initialization failure", err)
+		log.Error("Could not start L-IPAMD: ", err)
 		os.Exit(1)
 	}
 

@@ -59,19 +59,18 @@ type IPAMContext struct {
 // New retrieves IP address usage information from Instance MetaData service and Kubelet
 // then initializes IP address pool data store
 func New() (*IPAMContext, error) {
-	c := &IPAMContext{}
-
-	c.k8sClient = k8sapi.New()
-	c.networkClient = networkutils.New()
+	c := &IPAMContext{
+		k8sClient:     k8sapi.New(),
+		networkClient: networkutils.New(),
+	}
 
 	client, err := awsutils.New()
 	if err != nil {
 		log.Errorf("Failed to initialize awsutil interface %v", err)
-		return nil, errors.Wrap(err, "ipamD: can not initialize with AWS SDK interface")
+		return nil, errors.Wrap(err, "ipamd: can not initialize with AWS SDK interface")
 	}
 
 	c.awsClient = client
-
 	err = c.nodeInit()
 	if err != nil {
 		return nil, err
@@ -80,7 +79,7 @@ func New() (*IPAMContext, error) {
 	return c, nil
 }
 
-//TODO need to break this function down(comments from CR)
+//TODO(aws): need to break this function down(comments from CR)
 func (c *IPAMContext) nodeInit() error {
 	enis, err := c.awsClient.GetAttachedENIs()
 	if err != nil {
@@ -95,7 +94,6 @@ func (c *IPAMContext) nodeInit() error {
 	}
 
 	primaryIP := net.ParseIP(c.awsClient.GetLocalIPv4())
-
 	err = c.networkClient.SetupHostNetwork(vpcCIDR, &primaryIP)
 	if err != nil {
 		log.Error("Failed to setup host network", err)
@@ -109,7 +107,7 @@ func (c *IPAMContext) nodeInit() error {
 
 		err = c.awsClient.AllocAllIPAddress(eni.ENIID)
 		if err != nil {
-			//TODO need to increment ipamd err stats
+			//TODO(aws): need to increment ipamd err stats
 			log.Warn("During ipamd init:  error encountered on trying to allocate all available IP addresses", err)
 			// fall though to add those allocated OK addresses
 		}
@@ -125,7 +123,7 @@ func (c *IPAMContext) nodeInit() error {
 	if err != nil {
 		log.Warnf("During ipamd init, failed to get Pod information from Kubelet %v", err)
 		// This can happens when L-IPAMD starts before kubelet.
-		// TODO  need to add node health stats here
+		// TODO(aws):  need to add node health stats here
 		return nil
 	}
 
@@ -133,8 +131,8 @@ func (c *IPAMContext) nodeInit() error {
 		_, _, err = c.dataStore.AssignPodIPv4Address(ip)
 		if err != nil {
 			log.Warnf("During ipamd init, failed to use pod ip %s returned from Kubelet %v", ip.IP, err)
-			// TODO continue, but need to add node health stats here
-			// TODO need to feed this to controller on the health of pod and node
+			// TODO(aws): continue, but need to add node health stats here
+			// TODO(aws): need to feed this to controller on the health of pod and node
 			// This is a bug among kubelet/cni-plugin/l-ipamd/ec2-metadata that this particular pod is using an non existent ip address.
 			// Here we choose to continue instead of returning error and EXIT out L-IPAMD(exit L-IPAMD will make whole node out)
 			// The plan(TODO) is to feed this info back to controller and let controller cleanup this pod from this node.
@@ -187,7 +185,7 @@ func (c *IPAMContext) increaseIPPool() {
 			c.maxENI = c.dataStore.GetENIs()
 			log.Infof("Discovered the instance max ENI allowed is: %d", c.maxENI)
 		}
-		// TODO need to add health stats
+		// TODO(aws): need to add health stats
 		return
 	}
 
@@ -255,7 +253,7 @@ func (c *IPAMContext) addENIaddressesToDataStore(ec2Addrs []*ec2.NetworkInterfac
 		if err != nil && err.Error() != datastore.DuplicateIPError {
 			log.Warnf("Failed to increase ip pool, failed to add ip %s to data store", ec2Addr.PrivateIpAddress)
 			// continue to add next address
-			// TODO need to add health stats for err
+			// TODO(aws): need to add health stats for err
 		}
 	}
 }
@@ -284,7 +282,7 @@ func (c *IPAMContext) waitENIAttached(eni string) (awsutils.ENIMetadata, error) 
 		retry++
 		if retry > maxRetryCheckENI {
 			log.Errorf("Unable to discover attached ENI from metadata service")
-			// TODO need to add health stats
+			// TODO(aws): need to add health stats
 			return awsutils.ENIMetadata{}, errors.New("add eni: not able to retrieve eni from metata service")
 		}
 		enis, err := c.awsClient.GetAttachedENIs()
