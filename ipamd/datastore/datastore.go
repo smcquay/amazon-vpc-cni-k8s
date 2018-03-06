@@ -18,8 +18,8 @@ import (
 	"sync"
 	"time"
 
-	log "github.com/cihub/seelog"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/aws/amazon-vpc-cni-k8s/pkg/k8sapi"
 )

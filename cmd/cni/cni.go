@@ -24,7 +24,6 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
-	// log "github.com/cihub/seelog"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/pkg/errors"

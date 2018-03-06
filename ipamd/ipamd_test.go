@@ -22,7 +22,6 @@ import (
 	"github.com/aws/amazon-vpc-cni-k8s/pkg/awsutils"
 	"github.com/aws/amazon-vpc-cni-k8s/pkg/awsutils/mocks"
 	"github.com/aws/amazon-vpc-cni-k8s/pkg/k8sapi"
-	"github.com/aws/amazon-vpc-cni-k8s/pkg/k8sapi/mocks"
 	"github.com/aws/amazon-vpc-cni-k8s/pkg/networkutils/mocks"
 
 	"github.com/golang/mock/gomock"
@@ -51,22 +50,33 @@ const (
 
 func setup(t *testing.T) (*gomock.Controller,
 	*mock_awsutils.MockAPIs,
-	*mock_k8sapi.MockK8SAPIs,
 	*mock_networkutils.MockNetworkAPIs) {
 	ctrl := gomock.NewController(t)
 	return ctrl,
 		mock_awsutils.NewMockAPIs(ctrl),
-		mock_k8sapi.NewMockK8SAPIs(ctrl),
 		mock_networkutils.NewMockNetworkAPIs(ctrl)
 }
 
+type mockK8SAPIs struct {
+	fn func(localIP string) ([]*k8sapi.K8SPodInfo, error)
+}
+
+func (m *mockK8SAPIs) K8SGetLocalPodIPs(localIP string) ([]*k8sapi.K8SPodInfo, error) {
+	return m.fn(localIP)
+}
+
 func TestNodeInit(t *testing.T) {
-	ctrl, mockAWS, mockK8S, mockNetwork := setup(t)
+	ctrl, mockAWS, mockNetwork := setup(t)
 	defer ctrl.Finish()
 
 	mockContext := &IPAMD{
-		awsClient:     mockAWS,
-		k8sClient:     mockK8S,
+		awsClient: mockAWS,
+		k8sClient: &mockK8SAPIs{
+			func(localIP string) ([]*k8sapi.K8SPodInfo, error) {
+				return []*k8sapi.K8SPodInfo{&k8sapi.K8SPodInfo{Name: "pod1",
+					Namespace: "default"}}, nil
+			},
+		},
 		networkClient: mockNetwork}
 
 	eni1 := awsutils.ENIMetadata{
@@ -124,20 +134,25 @@ func TestNodeInit(t *testing.T) {
 	mockNetwork.EXPECT().SetupENINetwork(gomock.Any(), secMAC, secDevice, secSubnet)
 
 	mockAWS.EXPECT().GetLocalIPv4().Return(ipaddr01)
-	mockK8S.EXPECT().K8SGetLocalPodIPs(gomock.Any()).Return([]*k8sapi.K8SPodInfo{&k8sapi.K8SPodInfo{Name: "pod1",
-		Namespace: "default"}}, nil)
+	// mockK8S.EXPECT().K8SGetLocalPodIPs(gomock.Any()).Return([]*k8sapi.K8SPodInfo{&k8sapi.K8SPodInfo{Name: "pod1",
+	// 	Namespace: "default"}}, nil)
 
 	err := mockContext.init()
 	assert.NoError(t, err)
 }
 
 func TestIncreaseIPPool(t *testing.T) {
-	ctrl, mockAWS, mockK8S, mockNetwork := setup(t)
+	ctrl, mockAWS, mockNetwork := setup(t)
 	defer ctrl.Finish()
 
 	mockContext := &IPAMD{
-		awsClient:     mockAWS,
-		k8sClient:     mockK8S,
+		awsClient: mockAWS,
+		k8sClient: &mockK8SAPIs{
+			func(localIP string) ([]*k8sapi.K8SPodInfo, error) {
+				return []*k8sapi.K8SPodInfo{&k8sapi.K8SPodInfo{Name: "pod1",
+					Namespace: "default"}}, nil
+			},
+		},
 		networkClient: mockNetwork,
 	}
 

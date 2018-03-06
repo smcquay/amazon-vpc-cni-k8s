@@ -18,7 +18,7 @@ import (
 	"os"
 
 	"github.com/aws/amazon-vpc-cni-k8s/ipamd"
-	log "github.com/cihub/seelog"
+	log "github.com/sirupsen/logrus"
 )
 
 // const (

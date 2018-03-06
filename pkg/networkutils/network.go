@@ -22,7 +22,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	log "github.com/cihub/seelog"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/coreos/go-iptables/iptables"
 	"github.com/vishvananda/netlink"

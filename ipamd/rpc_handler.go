@@ -17,8 +17,8 @@ import (
 	"context"
 	"net"
 
-	log "github.com/cihub/seelog"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
