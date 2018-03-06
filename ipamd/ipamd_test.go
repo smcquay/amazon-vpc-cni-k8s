@@ -127,7 +127,7 @@ func TestNodeInit(t *testing.T) {
 	mockK8S.EXPECT().K8SGetLocalPodIPs(gomock.Any()).Return([]*k8sapi.K8SPodInfo{&k8sapi.K8SPodInfo{Name: "pod1",
 		Namespace: "default"}}, nil)
 
-	err := mockContext.nodeInit()
+	err := mockContext.init()
 	assert.NoError(t, err)
 }
 
