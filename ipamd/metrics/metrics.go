@@ -13,3 +13,7 @@ func New() (*Metrics, error) {
 
 	return m, nil
 }
+
+func (m *Metrics) IPPool(total, used, currentMaxAddrsPerENI, maxAddrsPerENI int) {
+
+}
