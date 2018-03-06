@@ -23,10 +23,10 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 
+	"github.com/aws/amazon-vpc-cni-k8s/cmd/cni/driver/mocks"
 	"github.com/aws/amazon-vpc-cni-k8s/pkg/grpcwrapper/mocks"
 	"github.com/aws/amazon-vpc-cni-k8s/pkg/rpcwrapper/mocks"
 	"github.com/aws/amazon-vpc-cni-k8s/pkg/typeswrapper/mocks"
-	"github.com/aws/amazon-vpc-cni-k8s/plugins/routed-eni/driver/mocks"
 	"github.com/aws/amazon-vpc-cni-k8s/rpc"
 	"github.com/aws/amazon-vpc-cni-k8s/rpc/mocks"
 	"google.golang.org/grpc"
