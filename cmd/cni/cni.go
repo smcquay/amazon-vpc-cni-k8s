@@ -91,13 +91,25 @@ func init() {
 	runtime.LockOSThread()
 }
 
-func cmdAdd(args *skel.CmdArgs) error {
-	return add(args, typeswrapper.New(), grpcwrapper.New(), rpcwrapper.New(), driver.New())
+func logArgs(args *skel.CmdArgs) string {
+	return fmt.Sprintf("ContainerID(%s) Netns(%s) IfName(%s) Args(%s) Path(%s)", args.ContainerID, args.Netns, args.IfName, args.Args, args.Path)
 }
 
-func add(args *skel.CmdArgs, cniTypes typeswrapper.CNITYPES, grpcClient grpcwrapper.GRPC, rpcClient rpcwrapper.RPC, driverClient driver.NetworkAPIs) error {
-	log.Infof("Received CNI add request: ContainerID(%s) Netns(%s) IfName(%s) Args(%s) Path(%s) argsStdinData(%s)",
-		args.ContainerID, args.Netns, args.IfName, args.Args, args.Path, args.StdinData)
+func cmdAdd(args *skel.CmdArgs) error {
+	// Set up a connection to the ipamD server.
+	conn, err := grpc.Dial(ipamDAddress, grpc.WithInsecure())
+	if err != nil {
+		log.Errorf("Failed to connect to backend server %s: %v", logArgs(args), err)
+		return errors.Wrap(err, "add cmd: failed to connect to backend server")
+	}
+	defer conn.Close()
+
+	c := pb.NewCNIBackendClient(conn)
+	return add(args, c, typeswrapper.New(), grpcwrapper.New(), rpcwrapper.New(), driver.New())
+}
+
+func add(args *skel.CmdArgs, c pb.CNIBackendClient, cniTypes typeswrapper.CNITYPES, grpcClient grpcwrapper.GRPC, rpcClient rpcwrapper.RPC, driverClient driver.NetworkAPIs) error {
+	log.Infof("Received CNI add request: %s argsStdinData(%s)", logArgs(args), args.StdinData)
 
 	conf := NetConf{}
 	if err := json.Unmarshal(args.StdinData, &conf); err != nil {
@@ -119,15 +131,6 @@ func add(args *skel.CmdArgs, cniTypes typeswrapper.CNITYPES, grpcClient grpcwrap
 		return errors.New("conf.VethPrefix must be less than 4 characters long")
 	}
 
-	// Set up a connection to the ipamD server.
-	conn, err := grpcClient.Dial(ipamDAddress, grpc.WithInsecure())
-	if err != nil {
-		log.Errorf("Failed to connect to backend server %s: %v", k8sArgs.String(), err)
-		return errors.Wrap(err, "add cmd: failed to connect to backend server")
-	}
-	defer conn.Close()
-
-	c := rpcClient.NewCNIBackendClient(conn)
 	r, err := c.AddNetwork(context.Background(), &pb.AddNetworkRequest{
 		Netns:                      args.Netns,
 		IfName:                     args.IfName,
