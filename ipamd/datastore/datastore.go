@@ -89,16 +89,6 @@ type DataStore struct {
 // PodInfos contains pods IP information which uses key name_namespace_container
 type PodInfos map[string]PodIPInfo
 
-// ENIInfos contains ENI IP information
-type ENIInfos struct {
-	// TotalIPs is the total number of IP addresses
-	TotalIPs int
-	// assigned is the number of IP addresses that has been assigned
-	AssignedIPs int
-	// ENIIPPools contains ENI IP pool information
-	ENIIPPools map[string]ENIIPPool
-}
-
 // NewDataStore returns DataStore structure
 func NewDataStore() *DataStore {
 	return &DataStore{

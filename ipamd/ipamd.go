@@ -44,7 +44,7 @@ const (
 // IPAMContext contains node level control information
 type IPAMContext struct {
 	awsClient     awsutils.APIs
-	dataStore     *datastore.DataStore
+	dataStore     datastore.DS
 	k8sClient     k8sapi.K8SAPIs
 	networkClient networkutils.NetworkAPIs
 
