@@ -14,6 +14,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/aws/amazon-ecs-cni-plugins/pkg/logger"
@@ -24,14 +25,18 @@ import (
 
 const (
 	defaultLogFilePath = "/host/var/log/aws-routed-eni/ipamd.log"
-	version            = "0.1.3"
+)
+
+var (
+	Version    = "0.1.3"
+	GitVersion = ""
 )
 
 func main() {
 	defer log.Flush()
 	logger.SetupLogger(logger.GetLogFileLocation(defaultLogFilePath))
+	log.Infof("Starting L-IPAMD %v %v  ...", Version, fmt.Sprintf("(%v)", GitVersion))
 
-	log.Infof("Starting L-IPAMD %s  ...", version)
 	aws_k8s_agent, err := ipamd.New()
 
 	if err != nil {
