@@ -223,7 +223,10 @@
 
 [[projects]]
   name = "github.com/prometheus/client_golang"
-  packages = ["prometheus"]
+  packages = [
+    "prometheus",
+    "prometheus/promhttp"
+  ]
   revision = "c5b7fccd204277076155f10851dad72b76a49317"
   version = "v0.8.0"
 
@@ -255,6 +258,12 @@
   revision = "282c8707aa210456a825798969cc27edda34992a"
 
 [[projects]]
+  name = "github.com/sirupsen/logrus"
+  packages = ["."]
+  revision = "d682213848ed68c0a260ca37d6dd5ace8423f5ba"
+  version = "v1.0.4"
+
+[[projects]]
   name = "github.com/spf13/pflag"
   packages = ["."]
   revision = "e57e3eeb33f795204c1ca35f56c44f83227c6e66"
@@ -283,6 +292,12 @@
 
 [[projects]]
   branch = "master"
+  name = "golang.org/x/crypto"
+  packages = ["ssh/terminal"]
+  revision = "8c653846df49742c4c85ec37e5d9f8d3ba657895"
+
+[[projects]]
+  branch = "master"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -298,7 +313,10 @@
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
-  packages = ["unix"]
+  packages = [
+    "unix",
+    "windows"
+  ]
   revision = "f6cff0780e542efa0c8e864dc8fa522808f6a598"
 
 [[projects]]
@@ -427,6 +445,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5cbcf7a78f0d14f34a95b4d76e9dcf1a0dec2c3c75f1242356926049a47a8051"
+  inputs-digest = "acbb2c3ff2b84deb1ca52a053fe944d7b1df5d934a9374847b6a1d30c8bd3ca5"
   solver-name = "gps-cdcl"
   solver-version = 1
