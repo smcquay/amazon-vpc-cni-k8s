@@ -120,8 +120,8 @@ func (c *IPAMD) init() error {
 		log.Debugf("Discovered ENI %s", eni.ENIID)
 
 		if err := c.awsClient.AllocAllIPAddress(eni.ENIID); err != nil {
-			//TODO(aws): need to increment ipamd err stats
 			log.Warn("ipamd init: error encountered on trying to allocate all available IP addresses", err)
+			//TODO(aws): need to increment ipamd err stats
 			// fall though to add those allocated OK addresses
 		}
 
@@ -225,8 +225,7 @@ func (c *IPAMD) decreaseIPPool() {
 // 2) add all ENI's secondary IP addresses to datastore
 // 3) setup linux eni related networking stack.
 func (c *IPAMD) setupENI(eni string, eniMetadata awsutils.ENIMetadata) error {
-	// Have discovered the attached ENI from metadata service
-	// add eni's IP to IP pool
+	// Have discovered the attached ENI from metadata service add eni's IP to IP pool.
 	err := c.dataStore.AddENI(eni, int(eniMetadata.DeviceNumber), (eni == c.awsClient.GetPrimaryENI()))
 	if err != nil && err.Error() != datastore.DuplicatedENIError {
 		return errors.Wrapf(err, "failed to add eni %s to data store", eni)
@@ -243,17 +242,17 @@ func (c *IPAMD) setupENI(eni string, eniMetadata awsutils.ENIMetadata) error {
 	}
 
 	if eni != c.awsClient.GetPrimaryENI() {
-		err = c.networkClient.SetupENINetwork(eniPrimaryIP, eniMetadata.MAC,
-			int(eniMetadata.DeviceNumber), eniMetadata.SubnetIPv4CIDR)
-		if err != nil {
+		if err := c.networkClient.SetupENINetwork(
+			eniPrimaryIP,
+			eniMetadata.MAC,
+			int(eniMetadata.DeviceNumber),
+			eniMetadata.SubnetIPv4CIDR); err != nil {
 			return errors.Wrapf(err, "failed to setup eni %s network", eni)
 		}
 	}
 
 	c.addENIaddressesToDataStore(ec2Addrs, eni)
-
 	return nil
-
 }
 
 func (c *IPAMD) addENIaddressesToDataStore(ec2Addrs []*ec2.NetworkInterfacePrivateIpAddress, eni string) {
@@ -280,8 +279,7 @@ func (c *IPAMD) getENIaddresses(eni string) ([]*ec2.NetworkInterfacePrivateIpAdd
 
 	for _, ec2Addr := range ec2Addrs {
 		if aws.BoolValue(ec2Addr.Primary) {
-			eniPrimaryIP := aws.StringValue(ec2Addr.PrivateIpAddress)
-			return ec2Addrs, eniPrimaryIP, nil
+			return ec2Addrs, aws.StringValue(ec2Addr.PrivateIpAddress), nil
 		}
 	}
 
