@@ -17,16 +17,14 @@ import (
 	"context"
 	"net"
 
+	log "github.com/cihub/seelog"
 	"github.com/pkg/errors"
-
-	pb "github.com/aws/amazon-vpc-cni-k8s/rpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	log "github.com/cihub/seelog"
-
 	"github.com/aws/amazon-vpc-cni-k8s/ipamd/datastore"
 	"github.com/aws/amazon-vpc-cni-k8s/pkg/k8sapi"
+	pb "github.com/aws/amazon-vpc-cni-k8s/rpc"
 )
 
 const (
