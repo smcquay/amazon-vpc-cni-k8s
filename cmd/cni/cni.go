@@ -119,8 +119,6 @@ func add(args *skel.CmdArgs, cniTypes typeswrapper.CNITYPES, grpcClient grpcwrap
 		return errors.New("conf.VethPrefix must be less than 4 characters long")
 	}
 
-	cniVersion := conf.CNIVersion
-
 	// Set up a connection to the ipamD server.
 	conn, err := grpcClient.Dial(ipamDAddress, grpc.WithInsecure())
 	if err != nil {
@@ -172,7 +170,7 @@ func add(args *skel.CmdArgs, cniTypes typeswrapper.CNITYPES, grpcClient grpcwrap
 		},
 	}
 
-	return cniTypes.PrintResult(result, cniVersion)
+	return cniTypes.PrintResult(result, conf.CNIVersion)
 }
 
 // generateHostVethName returns a name to be used on the host-side veth device.
