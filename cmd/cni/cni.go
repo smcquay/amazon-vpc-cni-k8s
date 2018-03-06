@@ -24,7 +24,8 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
-	log "github.com/cihub/seelog"
+	// log "github.com/cihub/seelog"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/pkg/errors"
 
@@ -271,7 +272,7 @@ func del(args *skel.CmdArgs, cniTypes typeswrapper.CNITYPES, grpcClient grpcwrap
 }
 
 func main() {
-	defer log.Flush()
+	// defer log.Flush()
 	// logger.SetupLogger(logger.GetLogFileLocation(defaultLogFilePath))
 
 	skel.PluginMain(cmdAdd, cmdDel, cniSpecVersion.All)
