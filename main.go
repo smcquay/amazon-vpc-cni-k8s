@@ -35,13 +35,13 @@ func main() {
 	// logger.SetupLogger(logger.GetLogFileLocation(defaultLogFilePath))
 	log.Infof("Starting L-IPAMD %v %v  ...", Version, fmt.Sprintf("(%v)", GitVersion))
 
-	aws_k8s_agent, err := ipamd.New()
+	ipamd, err := ipamd.New()
 	if err != nil {
 		log.Error("Could not start L-IPAMD: ", err)
 		os.Exit(1)
 	}
 
-	go aws_k8s_agent.StartNodeIPPoolManager()
-	go aws_k8s_agent.SetupHTTP()
-	aws_k8s_agent.RunRPCHandler()
+	go ipamd.StartNodeIPPoolManager()
+	go ipamd.SetupHTTP()
+	ipamd.RunRPCHandler()
 }
