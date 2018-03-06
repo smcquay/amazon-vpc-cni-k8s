@@ -64,7 +64,7 @@ func TestNodeInit(t *testing.T) {
 	ctrl, mockAWS, mockK8S, mockNetwork := setup(t)
 	defer ctrl.Finish()
 
-	mockContext := &IPAMContext{
+	mockContext := &IPAMD{
 		awsClient:     mockAWS,
 		k8sClient:     mockK8S,
 		networkClient: mockNetwork}
@@ -135,7 +135,7 @@ func TestIncreaseIPPool(t *testing.T) {
 	ctrl, mockAWS, mockK8S, mockNetwork := setup(t)
 	defer ctrl.Finish()
 
-	mockContext := &IPAMContext{
+	mockContext := &IPAMD{
 		awsClient:     mockAWS,
 		k8sClient:     mockK8S,
 		networkClient: mockNetwork,
