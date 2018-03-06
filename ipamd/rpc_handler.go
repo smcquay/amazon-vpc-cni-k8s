@@ -14,12 +14,12 @@
 package ipamd
 
 import (
+	"context"
 	"net"
 
 	"github.com/pkg/errors"
 
 	pb "github.com/aws/amazon-vpc-cni-k8s/rpc"
-	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
