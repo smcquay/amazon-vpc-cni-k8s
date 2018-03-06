@@ -15,6 +15,7 @@ package ipamd
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -50,6 +51,11 @@ func (c *IPAMD) SetupHTTP() {
 	serveMux.HandleFunc("/v1/pods", createDebugHandler(func() interface{} {
 		return c.dataStore.GetPodInfos()
 	}))
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, "TODO")
+	}
+	serveMux.HandleFunc("/live", handler)
+	serveMux.HandleFunc("/ready", handler)
 	serveMux.Handle("/metrics", promhttp.Handler())
 	s := &http.Server{
 		Addr:           httpPort,
