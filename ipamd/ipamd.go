@@ -22,7 +22,6 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/aws/aws-sdk-go/aws"
-
 	"github.com/aws/aws-sdk-go/service/ec2"
 
 	"github.com/aws/amazon-vpc-cni-k8s/ipamd/datastore"
