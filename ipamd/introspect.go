@@ -38,6 +38,7 @@ func createDebugHandler(fetcher func() interface{}) func(w http.ResponseWriter, 
 	}
 }
 
+// SetupHTTP sets up introspection service endpoint and prometheus metrics.
 func (c *IPAMD) SetupHTTP() {
 	serveMux := http.NewServeMux()
 	serveMux.HandleFunc("/", createDebugHandler(func() interface{} {
