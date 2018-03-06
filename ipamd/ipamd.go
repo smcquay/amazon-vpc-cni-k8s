@@ -153,9 +153,10 @@ func (c *IPAMD) StartNodeIPPoolManager() {
 }
 
 func (c *IPAMD) updateIPPoolIfRequired() {
-	if c.nodeIPPoolTooLow() {
+	total, used := c.dataStore.GetStats()
+	if (total - used) <= c.currentMaxAddrsPerENI {
 		c.increaseIPPool()
-	} else if c.nodeIPPoolTooHigh() {
+	} else if total-used > 2*c.currentMaxAddrsPerENI {
 		c.decreaseIPPool()
 	}
 }
@@ -300,24 +301,4 @@ func (c *IPAMD) waitENIAttached(eni string) (awsutils.ENIMetadata, error) {
 	log.Errorf("Unable to discover attached ENI from metadata service")
 	// TODO(aws): need to add health stats
 	return awsutils.ENIMetadata{}, errors.New("add eni: not able to retrieve eni from metata service")
-}
-
-//nodeIPPoolTooLow returns true if IP pool is below low threshhold
-func (c *IPAMD) nodeIPPoolTooLow() bool {
-	total, used := c.dataStore.GetStats()
-	// log.Debugf("IP pool stats: total=%d, used=%d, c.currentMaxAddrsPerENI =%d, c.maxAddrsPerENI = %d",
-	// 	total, used, c.currentMaxAddrsPerENI, c.maxAddrsPerENI)
-
-	return ((total - used) <= c.currentMaxAddrsPerENI)
-}
-
-// NodeIPPoolTooHigh returns true if IP pool is above high threshhold
-func (c *IPAMD) nodeIPPoolTooHigh() bool {
-	total, used := c.dataStore.GetStats()
-
-	// log.Debugf("IP pool stats: total=%d, used=%d, c.currentMaxAddrsPerENI =%d, c.maxAddrsPerENI = %d",
-	// 	total, used, c.currentMaxAddrsPerENI, c.maxAddrsPerENI)
-
-	return (total-used > 2*c.currentMaxAddrsPerENI)
-
 }
