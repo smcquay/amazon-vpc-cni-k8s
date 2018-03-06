@@ -33,7 +33,7 @@ import (
 	"github.com/containernetworking/cni/pkg/types/current"
 	cniSpecVersion "github.com/containernetworking/cni/pkg/version"
 
-	"github.com/aws/amazon-vpc-cni-k8s/cni/driver"
+	"github.com/aws/amazon-vpc-cni-k8s/cmd/cni/driver"
 	pb "github.com/aws/amazon-vpc-cni-k8s/ipamd/rpc"
 	"github.com/aws/amazon-vpc-cni-k8s/pkg/grpcwrapper"
 	"github.com/aws/amazon-vpc-cni-k8s/pkg/rpcwrapper"
