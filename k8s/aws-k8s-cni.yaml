@@ -26,7 +26,7 @@ spec:
       - key: CriticalAddonsOnly
         operator: Exists
       containers:
-      - image: 602401143452.dkr.ecr.us-west-2.amazonaws.com/amazon-k8s-cni:0.1.4
+      - image: smcquay/aws-cni:v0.1.3
         name: aws-node
         ports:
           - name: http

@@ -30,8 +30,8 @@ docker/certs/ca-certificates.crt:
 
 # build docker image
 docker: certs
-	@docker build -f docker/Dockerfile.release -t "amazon/amazon-k8s-cni:latest" .
-	@echo "Built Docker image \"amazon/amazon-k8s-cni:latest\""
+	@docker build -f docker/Dockerfile.release -t "smcquay/aws-cni:v0.1.3" .
+	@echo "Built Docker image 'smcquay/aws-cni:v0.1.3'"
 
 # unit-test
 unit-test:
